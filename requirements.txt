@@ -1,0 +1,2 @@
+-c https://releases.openstack.org/constraints/upper/master
+nova

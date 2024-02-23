@@ -1,0 +1,15 @@
+[package]
+name = "nova-oxide"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = { version ="0.4.34", features = ["serde"] }
+pyo3 = "0.20.2"
+rustfmt-wrapper = "0.2.1"
+schemars = { version = "0.8.16", features = ["chrono"] }
+serde = "1.0.196"
+serde_json = "1.0.113"
+typify = "0.0.15"
