@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::{io::Write, vec};
 
 use pyo3::{prelude::*, types::{PyModule, PyType}};
 use serde_json;
@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         TypeSpaceSettings::default()
             .with_derive("JsonSchema".to_string())
             .with_type_mod("types")
-            .with_struct_builder(true)
+            .with_struct_builder(false)
             .with_patch(
                 "AllTheTraits",
                 TypeSpacePatch::default()
@@ -68,15 +68,34 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     file.write_all(contents.as_bytes())?;
     file.sync_all()?;
 
-    // create a flavor data object
-    let flavor_inst = gen::flavor::FlavorVariant0NovaObjectData::builder()
-        .id(42).flavorid("m1.small")
-        .name("m1.small".to_string())
-        .memory_mb(2048).vcpus(2).root_gb(20)
-        .ephemeral_gb(0).swap(0).projects(vec![]).is_public(true).rxtx_factor(1.0);
-    println!("{:?}", flavor_inst);
+    let flavor = gen::flavor::Flavor::Variant0 {
+        nova_object_changes: vec![], 
+        nova_object_data: Default::default(),
+        nova_object_name: "Flavor".to_string(), 
+        nova_object_namespace: "nova".to_string(), 
+        nova_object_version: "1.0".to_string(),
+    };
+    println!("Flavor: ");
+    serde_json::to_writer(std::io::stdout(), &flavor)?;
+    println!("\n\n\n");
+
+    println!("FlavorVariant0 form Flavor: ");
+    let data = r#"{"nova_object_changes":[], "nova_object.data":{"deleted":false,"description":"tiny flavor","disabled":false,"ephemeral_gb":0,"extra_specs":{},"flavorid":"1","id":0,"is_public":true,"memory_mb":512,"name":"m1.tiny","projects":[],"root_gb":10,"rxtx_factor":1.0,"swap":0,"vcpu_weight":1,"vcpus":1},"nova_object.name":"Flavor","nova_object.namespace":"nova","nova_object.version":"1.0"}"#;
+    let flavor_ovo: gen::flavor::Flavor = serde_json::from_str(data)?;
+    let flavor_variant0: gen::FlavorVariant0 = flavor_ovo.into();
+    serde_json::to_writer(std::io::stdout(), &flavor_variant0)?;
+
+    println!("\n\n\n");
+    println!("FlavorVariant0: ");
+    let data = r#"{"nova_object_changes":[], "nova_object.data":{"deleted":false,"description":"tiny flavor","disabled":false,"ephemeral_gb":0,"extra_specs":{},"flavorid":"1","id":0,"is_public":true,"memory_mb":512,"name":"m1.tiny","projects":[],"root_gb":10,"rxtx_factor":1.0,"swap":0,"vcpu_weight":1,"vcpus":1},"nova_object.name":"Flavor","nova_object.namespace":"nova","nova_object.version":"1.0"}"#;
+    let flavor_ovo: gen::FlavorVariant0 = serde_json::from_str(data)?;
+    serde_json::to_writer(std::io::stdout(), &flavor_ovo)?;
+    println!("\n\n\n");
     Ok(())
 }
+
+
+
 
 fn get_json_schema(qualified_class_name: &str) -> Result<String, PyErr> {
     Python::with_gil(|py| {
